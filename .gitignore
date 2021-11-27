@@ -5,3 +5,9 @@ _build
 *.native
 *.byte
 .DS_Store
+
+.fake
+.ionide
+
+bin/
+obj/

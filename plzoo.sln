@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C6062071-2785-444F-AEBF-1C1343AC3AE4}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "zoo", "src\zoo\zoo.fsproj", "{5FEF167D-F392-4184-AC5A-AF0597814510}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "calc", "src\calc\calc.fsproj", "{504FC1C7-1C45-41D1-ADD7-473D58DF4885}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "calc.test", "src\calc.test\calc.test.fsproj", "{CA1FBF66-F411-4490-B89A-18BBC212ADC9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5FEF167D-F392-4184-AC5A-AF0597814510}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FEF167D-F392-4184-AC5A-AF0597814510}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FEF167D-F392-4184-AC5A-AF0597814510}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FEF167D-F392-4184-AC5A-AF0597814510}.Release|Any CPU.Build.0 = Release|Any CPU
+		{504FC1C7-1C45-41D1-ADD7-473D58DF4885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{504FC1C7-1C45-41D1-ADD7-473D58DF4885}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{504FC1C7-1C45-41D1-ADD7-473D58DF4885}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{504FC1C7-1C45-41D1-ADD7-473D58DF4885}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA1FBF66-F411-4490-B89A-18BBC212ADC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA1FBF66-F411-4490-B89A-18BBC212ADC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA1FBF66-F411-4490-B89A-18BBC212ADC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA1FBF66-F411-4490-B89A-18BBC212ADC9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5FEF167D-F392-4184-AC5A-AF0597814510} = {C6062071-2785-444F-AEBF-1C1343AC3AE4}
+		{504FC1C7-1C45-41D1-ADD7-473D58DF4885} = {C6062071-2785-444F-AEBF-1C1343AC3AE4}
+		{CA1FBF66-F411-4490-B89A-18BBC212ADC9} = {C6062071-2785-444F-AEBF-1C1343AC3AE4}
+	EndGlobalSection
+EndGlobal

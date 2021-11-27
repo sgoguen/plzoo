@@ -1,17 +1,23 @@
+module Zoo
 (* This file contains all the common code used by the languages implemented in the PL Zoo. *)
 
+open FSharp.Text
+
+type position = Lexing.Position
+
 type location =
-  | Location of Lexing.position * Lexing.position (** delimited location *)
+  | Location of startPos:position * endPos:position (** delimited location *)
   | Nowhere (** no location *)
 
 type 'a located = { data : 'a ; loc : location }
 
 let make_location loc1 loc2 = Location (loc1, loc2)
 
-let location_of_lex lex =
-  Location (Lexing.lexeme_start_p lex, Lexing.lexeme_end_p lex)
+// let location_of_lex lex =
+//   Location (Lexing.lexeme_start_p lex, Lexing.lexeme_end_p lex)
 
-let locate ?(loc=Nowhere) x = { data = x; loc = loc }
+
+let locate (loc:location) x = { data = x; loc = loc }
 
 (** Exception [Error (loc, err, msg)] indicates an error of type [err] with error message
     [msg], occurring at location [loc]. *)
@@ -19,14 +25,13 @@ exception Error of (location * string * string)
 
 (** [error ~loc ~kind] raises an error of the given [kind]. The [kfprintf] magic allows
     one to write [msg] using a format string. *)
-let error ?(kind="Error") ?(loc=Nowhere) =
-  let k _ =
-    let msg = Format.flush_str_formatter () in
-      raise (Error (loc, kind, msg))
-  in
-    Format.kfprintf k Format.str_formatter
+let error (kind:string) (loc:location) =
+      raise (Error (loc, kind, (sprintf "%A" loc)))
 
-let print_parens ?(max_level=9999) ?(at_level=0) ppf =
+(*
+
+
+let print_parens (max_level:int) (at_level:int) ppf =
   if max_level < at_level then
     begin
       Format.fprintf ppf "(@[" ;
@@ -54,13 +59,13 @@ let print_location loc ppf =
         Format.fprintf ppf "line %d, characters %d-%d" (begin_line - 1) begin_char end_char
 
 (** A fatal error reported by the toplevel. *)
-let fatal_error msg = error ~kind:"Fatal error" msg
+let fatal_error msg = error "Fatal error" msg
 
 (** A syntax error reported by the toplevel *)
-let syntax_error ?loc msg = error ~kind:"Syntax error" ?loc msg
+let syntax_error loc msg = error "Syntax error" loc msg
 
 (** Print a message at a given location [loc] of message type [msg_type]. *)
-let print_message ?(loc=Nowhere) msg_type =
+let print_message loc msg_type =
   match loc with
   | Location _ ->
      Format.eprintf "%s at %t:@\n" msg_type (print_location loc) ;
@@ -70,24 +75,23 @@ let print_message ?(loc=Nowhere) msg_type =
      Format.kfprintf (fun ppf -> Format.fprintf ppf "@.") Format.err_formatter
 
 (** Print the caught error *)
-let print_error (loc, err_type, msg) = print_message ~loc err_type "%s" msg
+let print_error (loc, err_type, msg) = print_message loc err_type "%s" msg
 
 let print_info msg = Format.kfprintf (fun ppf -> Format.pp_print_flush ppf ()) Format.std_formatter msg
+*)
 
-module type LANGUAGE =
-sig
-  val name : string
-  type command
-  type environment
-  val options : (Arg.key * Arg.spec * Arg.doc) list
-  val initial_environment : environment
-  val file_parser : (Lexing.lexbuf -> command list) option
-  val toplevel_parser : (Lexing.lexbuf -> command) option
-  val exec : environment -> command -> environment
-end
+// type LANGUAGE<'command, 'environment>  =
+//   abstract member name : string
+//   // type command
+//   // type environment
+//   abstract member options : (Arg.key * Arg.spec * Arg.doc) list
+//   abstract member initial_environment : 'environment
+//   abstract member file_parser : (Lexing.lexbuf -> 'command list) option
+//   abstract member toplevel_parser : (Lexing.lexbuf -> 'command) option
+//   abstract member exec : 'environment -> 'command -> 'environment
 
-module Main (L : LANGUAGE) =
-struct
+(*
+  type Main (L : LANGUAGE) =
 
   (** Should the interactive shell be run? *)
   let interactive_shell = ref true
@@ -136,27 +140,27 @@ struct
     interactive_shell := false
 
   (** Parse the contents from a file, using a given [parser]. *)
-  let read_file parser fn =
-  try
-    let fh = open_in fn in
-    let lex = Lexing.from_channel fh in
-    lex.Lexing.lex_curr_p <- {lex.Lexing.lex_curr_p with Lexing.pos_fname = fn};
+  member this.read_file parser fn =
     try
-      let terms = parser lex in
-      close_in fh;
-      terms
+      let fh = open_in fn in
+      let lex = Lexing.from_channel fh in
+      lex.Lexing.lex_curr_p <- {lex.Lexing.lex_curr_p with Lexing.pos_fname = fn};
+      try
+        let terms = parser lex in
+        close_in fh;
+        terms
+      with
+        (* Close the file in case of any parsing errors. *)
+        Error err -> close_in fh ; raise (Error err)
     with
-      (* Close the file in case of any parsing errors. *)
-      Error err -> close_in fh ; raise (Error err)
-  with
-    (* Any errors when opening or closing a file are fatal. *)
-    Sys_error msg -> fatal_error "%s" msg
+      (* Any errors when opening or closing a file are fatal. *)
+      Sys_error msg -> fatal_error "%s" msg
 
   (** Parse input from toplevel, using the given [parser]. *)
-  let read_toplevel parser () =
+  member this.read_toplevel parser () =
     let prompt = L.name ^ "> "
     and prompt_more = String.make (String.length L.name) ' ' ^ "> " in
-    print_string prompt ;
+      print_string prompt ;
     let str = ref (read_line ()) in
       while String.length !str > 0 && !str.[String.length !str - 1] == '\\' do
         print_string prompt_more ;
@@ -165,7 +169,7 @@ struct
       parser (Lexing.from_string (!str ^ "\n"))
 
   (** Parser wrapper that catches syntax-related errors and converts them to errors. *)
-  let wrap_syntax_errors parser lex =
+  member this.wrap_syntax_errors parser lex =
     try
       parser lex
     with
@@ -175,7 +179,7 @@ struct
         syntax_error ~loc:(location_of_lex lex) "syntax error"
 
   (** Load directives from the given file. *)
-  let use_file ctx (filename, interactive) =
+  member this.use_file ctx (filename, interactive) =
     match L.file_parser with
     | Some f ->
        let cmds = read_file (wrap_syntax_errors f) filename in
@@ -184,7 +188,7 @@ struct
        fatal_error "Cannot load files, only interactive shell is available"
 
   (** Interactive toplevel *)
-  let toplevel ctx =
+  member this.toplevel ctx =
     let eof = match Sys.os_type with
       | "Unix" | "Cygwin" -> "Ctrl-D"
       | "Win32" -> "Ctrl-Z"
@@ -210,7 +214,7 @@ struct
       with End_of_file -> ()
 
   (** Main program *)
-  let main () =
+  member this.main () =
     (* Intercept Ctrl-C by the user *)
     Sys.catch_break true;
     (* Parse the arguments. *)
@@ -243,4 +247,4 @@ struct
         if !interactive_shell then toplevel ctx
     with
         Error err -> print_error err; exit 1
-end
+*)
