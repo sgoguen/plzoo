@@ -160,7 +160,13 @@ module Test1 =
         Lambda("x", App(Var("x"), Var("x")))
         Lambda("x", Lambda("y", App(Var("x"), Var("y"))))
     ]
-    for l in lambdas do
-        let d = Desugar.expr [] l
-        printfn "lambda: %A" l
-        printfn "   De Bruijn: %A" d
+    // for l in lambdas do
+        
+    //     let d = Desugar.expr [] l
+    //     printfn "lambda: %A" l
+    //     printfn "   De Bruijn: %A" d
+    // let d = Desugar.expr [] (App(App(AND, T), F))
+    let d = Desugar.expr [] (App(AND, F))
+    printfn "Lambda: %A" d
+    let e = Norm.norm true false [] d
+    printfn "Normalized: %A" e
